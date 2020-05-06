@@ -1,0 +1,26 @@
+{
+  "name": "simple-analytics-notifier",
+  "description": "Sending notifications to Telegram from other sources",
+  "author": "Adriaan van Rossum",
+  "version": "1.0.0",
+  "engines": {
+    "node": "12"
+  },
+  "main": "index.js",
+  "scripts": {
+    "server": "node index.js",
+    "start": "nodemon -e js,sql -x node -r dotenv/config index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "koa": "^2.6.2",
+    "koa-bodyparser": "^4.2.1",
+    "moment": "^2.24.0",
+    "moment-timezone": "^0.5.25",
+    "node-persist": "^3.0.4",
+    "twilio": "^3.25.0"
+  },
+  "devDependencies": {
+    "dotenv": "^6.2.0"
+  }
+}
