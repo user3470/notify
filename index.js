@@ -1,9 +1,12 @@
 const Koa = require("koa");
 const bodyParser = require("koa-bodyparser");
-const { send } = require("./services/telegram");
+const { send: sendTelegram } = require("./services/telegram");
+const { send: sendKeybase } = require("./services/keybase");
 const telegramHook = require("./routes/hook");
 const { promisify } = require("util");
 const moment = require("moment-timezone");
+
+const storage = require("./services/storage");
 
 const { PORT, GITHUB_IGNORE_USERNAMES } = process.env;
 
@@ -14,6 +17,26 @@ const obfuscate = (email) => {
   let emailParts = email.split("@");
   emailParts[0] = emailParts[0].slice(0, -3) + "***";
   return emailParts.join("@");
+};
+
+const send = async (message, options) => {
+  const lastCriticalNotification =
+    (await storage.getItem("lastCriticalNotification")) || 0;
+  const doSendCritical =
+    options.critical && lastCriticalNotification < Date.now() - 1800000; // 1800000 = 1/2 hour
+
+  const params = [message, { ...options, critical: doSendCritical }];
+  const promises = [sendTelegram(...params)];
+  if (!options.support) promises.push(sendKeybase(...params));
+
+  try {
+    await Promise.all(promises);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    // Reset last notification time
+    await storage.setItem("lastCriticalNotification", Date.now());
+  }
 };
 
 app.use(

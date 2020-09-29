@@ -15,7 +15,7 @@ const getPost = (req) =>
 const getJSON = async (res) => {
   try {
     const body = await getPost(res);
-    const json = JSON.parse(body);
+    const json = body ? JSON.parse(body) : {};
     return json;
   } catch (err) {
     return err;

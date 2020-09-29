@@ -110,10 +110,7 @@ const send = async (
         delete: false,
       });
 
-    const lastCriticalNotification =
-      (await storage.getItem("lastCriticalNotification")) || 0;
-    const doSendCritical =
-      test || (critical && lastCriticalNotification < Date.now() - 1800000); // 1800000 = 1/2 hour
+    const doSendCritical = test || critical;
 
     // Always send message to non critical group
     telegram("sendMessage", {
@@ -165,9 +162,6 @@ const send = async (
         })
         .done();
     }
-
-    // Reset last notification time
-    await storage.setItem("lastCriticalNotification", Date.now());
   } catch (error) {
     console.error(error);
   }
