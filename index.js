@@ -25,18 +25,32 @@ const send = async (message, options) => {
   const doSendCritical =
     options.critical && lastCriticalNotification < Date.now() - 1800000; // 1800000 = 1/2 hour
 
-  const params = [message, { ...options, critical: doSendCritical }];
-  const promises = [sendTelegram(...params)];
-  if (!options.support) promises.push(sendKeybase(...params));
+  console.log(
+    `=> send("${message}", ${JSON.stringify(options)})`,
+    "last:",
+    lastCriticalNotification,
+    "send:",
+    doSendCritical
+  );
 
+  const params = [message, { ...options, critical: doSendCritical }];
+
+  // Sent to Telegram and Twilio
   try {
-    await Promise.all(promises);
+    await sendTelegram(...params);
   } catch (error) {
     console.error(error);
-  } finally {
-    // Reset last notification time
-    await storage.setItem("lastCriticalNotification", Date.now());
   }
+
+  // Sent to Keybase
+  try {
+    if (!options.support) await sendKeybase(...params);
+  } catch (error) {
+    console.error(error);
+  }
+
+  // Reset last notification time
+  await storage.setItem("lastCriticalNotification", Date.now());
 };
 
 app.use(
