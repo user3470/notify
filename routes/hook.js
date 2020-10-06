@@ -55,6 +55,7 @@ module.exports = async (ctx) => {
     message_id,
     chat: { id: chat_id },
     text,
+    reply_markup,
   } = message;
 
   if (WHITELIST.indexOf(chat_id) === -1) {
@@ -70,7 +71,7 @@ module.exports = async (ctx) => {
     const command = /^\/[^@ ]+/.exec(text) ? /^\/[^@ ]+/.exec(text)[0] : null;
     const content = command ? text.substr(text.indexOf(" ") + 1).trim() : null;
 
-    if (command) {
+    if (command || reply_markup) {
       try {
         telegram("deleteMessage", { chat_id, message_id });
       } catch (e) {
