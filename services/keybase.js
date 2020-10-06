@@ -1,5 +1,3 @@
-const https = require("https");
-
 const { post } = require("../utils/request");
 
 const { KEYBASE_ALERTS_WEBHOOK_ID } = process.env;
