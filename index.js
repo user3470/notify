@@ -25,14 +25,6 @@ const send = async (message, options) => {
   const doSendCritical =
     options.critical && lastCriticalNotification < Date.now() - 1800000; // 1800000 = 1/2 hour
 
-  console.log(
-    `=> send("${message}", ${JSON.stringify(options)})`,
-    "last:",
-    lastCriticalNotification,
-    "send:",
-    doSendCritical
-  );
-
   const params = [message, { ...options, critical: doSendCritical }];
 
   // Sent to Telegram and Twilio
