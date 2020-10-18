@@ -22,8 +22,20 @@ const obfuscate = (email) => {
 const send = async (message, options) => {
   const lastCriticalNotification =
     (await storage.getItem("lastCriticalNotification")) || 0;
+
   const doSendCritical =
     options.critical && lastCriticalNotification < Date.now() - 1800000; // 1800000 = 1/2 hour
+
+  console.log(
+    "=> doSendCritical",
+    doSendCritical,
+    "lastCriticalNotification",
+    lastCriticalNotification,
+    "diff",
+    Date.now() - 1800000,
+    "send?",
+    lastCriticalNotification < Date.now() - 1800000
+  );
 
   const params = [message, { ...options, critical: doSendCritical }];
 
