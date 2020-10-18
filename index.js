@@ -19,7 +19,7 @@ const obfuscate = (email) => {
   return emailParts.join("@");
 };
 
-const send = async (message, options) => {
+const send = async (message, options = {}) => {
   const lastCriticalNotification =
     (await storage.getItem("lastCriticalNotification")) || 0;
 
