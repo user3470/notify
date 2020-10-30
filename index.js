@@ -3,8 +3,6 @@ const bodyParser = require("koa-bodyparser");
 const { send: sendTelegram } = require("./services/telegram");
 const { send: sendKeybase } = require("./services/keybase");
 const telegramHook = require("./routes/hook");
-const { promisify } = require("util");
-const moment = require("moment-timezone");
 
 const storage = require("./services/storage");
 
@@ -56,6 +54,19 @@ const send = async (message, options = {}) => {
   // Reset last notification time
   await storage.setItem("lastCriticalNotification", Date.now());
 };
+
+app.use(async (ctx, next) => {
+  const body = ctx.request.body;
+
+  try {
+    if (body) JSON.parse(body);
+  } catch ({ message }) {
+    console.log(`[NOTIFY][JSON][ERROR] ${message}:`);
+    console.log(body);
+  }
+
+  return next();
+});
 
 app.use(
   bodyParser({

@@ -18,6 +18,7 @@ const getJSON = async (res) => {
     const json = body ? JSON.parse(body) : {};
     return json;
   } catch (err) {
+    console.log(`getJSON: ${err.message}\n${body}`);
     return err;
   }
 };

@@ -41,6 +41,7 @@ const getJSONBody = async (req) => {
     const json = JSON.parse(body);
     return Promise.resolve(json);
   } catch (err) {
+    console.log(`getJSONBody: ${err.message}\n${body}`);
     return Promise.reject(err);
   }
 };
