@@ -21,19 +21,18 @@ const send = async (message, options = {}) => {
   const lastCriticalNotification =
     (await storage.getItem("lastCriticalNotification")) || 0;
 
+  const hadRecentAlert = lastCriticalNotification > Date.now() - 1800000; // 1800000 = 1/2 hour
   const doSendCritical =
-    options.critical && lastCriticalNotification < Date.now() - 1800000; // 1800000 = 1/2 hour
+    options.critical && (!hadRecentAlert || message.includes("monthly test"));
 
-  console.log(
-    "=> doSendCritical",
+  console.log("[NOTIFY] send params:", {
     doSendCritical,
-    "lastCriticalNotification",
+    message,
     lastCriticalNotification,
-    "diff",
-    Date.now() - 1800000,
-    "send?",
-    lastCriticalNotification < Date.now() - 1800000
-  );
+    hadRecentAlert,
+    diff: Date.now() - 1800000,
+    send: lastCriticalNotification < Date.now() - 1800000,
+  });
 
   const params = [message, { ...options, critical: doSendCritical }];
 
