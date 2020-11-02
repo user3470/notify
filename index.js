@@ -118,6 +118,7 @@ app.use(async (ctx, next) => {
       return (ctx.body = { success: true });
     }
     case "/message": {
+      console.log("[NOTIFY][MESSAGE][IN]", JSON.stringify({ body }));
       const message = body.message;
       const critical = body.critical || false;
       if (message) send(message, { critical });
