@@ -8,6 +8,7 @@ const storage = require("./services/storage");
 
 const { PORT, GITHUB_IGNORE_USERNAMES } = process.env;
 
+const THRESHOLD_MS = 1800000; // 30 minutes
 const port = PORT || 3000;
 const app = new Koa();
 
@@ -21,17 +22,20 @@ const send = async (message, options = {}) => {
   const lastCriticalNotification =
     (await storage.getItem("lastCriticalNotification")) || 0;
 
-  const hadRecentAlert = lastCriticalNotification > Date.now() - 1800000; // 1800000 = 1/2 hour
+  const hadRecentAlert = lastCriticalNotification > Date.now() - THRESHOLD_MS;
   const doSendCritical =
     options.critical && (!hadRecentAlert || message.includes("monthly test"));
 
-  console.log("[NOTIFY] send params:", {
+  console.log("[NOTIFY] send params:\n", {
+    critical: options.critical,
     doSendCritical,
     message,
     lastCriticalNotification,
+    dateNow: Date.now(),
+    threshold: THRESHOLD_MS,
+    diff: Date.now() - THRESHOLD_MS,
     hadRecentAlert,
-    diff: Date.now() - 1800000,
-    send: lastCriticalNotification < Date.now() - 1800000,
+    send: lastCriticalNotification > Date.now() - THRESHOLD_MS,
   });
 
   const params = [message, { ...options, critical: doSendCritical }];
@@ -51,7 +55,8 @@ const send = async (message, options = {}) => {
   }
 
   // Reset last notification time
-  await storage.setItem("lastCriticalNotification", Date.now());
+  if (doSendCritical)
+    await storage.setItem("lastCriticalNotification", Date.now());
 };
 
 app.use(async (ctx, next) => {
