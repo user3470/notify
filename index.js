@@ -12,7 +12,13 @@ const THRESHOLD_MS = 1800000; // 30 minutes
 const port = PORT || 3000;
 const app = new Koa();
 
-const BLOCK_REGEX = /(SEO|inquiry|Website Design|Website video|stainless|mailgun|appsumo|saasmantra|zoom.us|Users List|User List|invoice|scale your business|Manufacture)/i
+const BLOCK_REGEX =
+  /(SEO|inquiry|Website Design|Website video|stainless|mailgun|appsumo|saasmantra|zoom.us|Users List|User List|invoice|scale your business|Manufacture)/i;
+
+const SKIP_MESSAGES = [
+  "Append page views: undefined",
+  "Total page views: undefined",
+];
 
 const obfuscate = (email) => {
   let emailParts = email.split("@");
@@ -121,13 +127,24 @@ app.use(async (ctx, next) => {
         " "
       )}`;
 
-      const isBlocked = BLOCK_REGEX.test(subject) || BLOCK_REGEX.test(text) || BLOCK_REGEX.test(sender)
+      const isBlocked =
+        BLOCK_REGEX.test(subject) ||
+        BLOCK_REGEX.test(text) ||
+        BLOCK_REGEX.test(sender);
       if (!isBlocked) send(message, { support: true });
       return (ctx.body = { success: true });
     }
     case "/message": {
       console.log("[NOTIFY][MESSAGE][IN]", JSON.stringify({ body }));
       const message = body.message;
+
+      if (SKIP_MESSAGES.includes(message)) {
+        return (ctx.body = {
+          success: false,
+          error: "This message is blocked",
+        });
+      }
+
       const critical = body.critical || false;
       if (message) send(message, { critical });
       return (ctx.body = { success: !!message });
