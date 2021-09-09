@@ -147,7 +147,7 @@ app.use(async (ctx, next) => {
         });
       }
 
-      log(ctx.request.headers);
+      console.log(ctx.request.headers);
 
       const critical = body.critical || false;
       if (message) send(message, { critical, ip });
