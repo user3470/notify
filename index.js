@@ -35,6 +35,7 @@ const send = async (message, options = {}) => {
     options.critical && (!hadRecentAlert || message.includes("monthly test"));
 
   console.log("[NOTIFY] send params:\n", {
+    ip: options.ip,
     critical: options.critical,
     doSendCritical,
     message,
@@ -90,6 +91,7 @@ app.use(async (ctx, next) => {
   const method = ctx.request.method;
   const path = ctx.request.url;
   const body = ctx.request.body;
+  const ip = ctx.request.ip;
 
   if (method === "OPTIONS") {
     ctx.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -146,7 +148,7 @@ app.use(async (ctx, next) => {
       }
 
       const critical = body.critical || false;
-      if (message) send(message, { critical });
+      if (message) send(message, { critical, ip });
       return (ctx.body = { success: !!message });
     }
     case "/github": {
