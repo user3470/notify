@@ -172,6 +172,8 @@ app.use(async (ctx, next) => {
       return (ctx.body = { success: !!message });
     }
     case "/alertmanager": {
+      let foundDeadmanSwitch = false;
+
       if (!body?.alerts?.length) {
         ctx.status = 400;
         ctx.body = {
@@ -190,6 +192,13 @@ app.use(async (ctx, next) => {
           alert?.labels?.severity === "critical" &&
           alert?.status !== "resolved";
 
+        const name = alert?.labels?.alertname;
+
+        if (name === "PrometheusAlertmanagerE2eDeadManSwitch") {
+          foundDeadmanSwitch = true;
+          continue;
+        }
+
         const message = [
           `<a href="${url}">${alert?.status}</a>`,
           alert?.labels?.severity,
@@ -198,6 +207,12 @@ app.use(async (ctx, next) => {
         ].join(" ");
 
         send(message, { critical });
+      }
+
+      if (!foundDeadmanSwitch) {
+        send(`Alerts are broken!`, { critical: true });
+        ctx.body = { success: false, error: "Didn't find deadman switch" };
+        return;
       }
 
       return (ctx.body = { success: true });
