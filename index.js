@@ -153,6 +153,10 @@ app.use(async (ctx, next) => {
       if (message) send(message, { critical, ip });
       return (ctx.body = { success: !!message });
     }
+    case "/alertmanager": {
+      console.log("[alertmanager]", JSON.stringify({ body }));
+      return (ctx.body = { success: true });
+    }
     case "/github": {
       if (
         (GITHUB_IGNORE_USERNAMES || "")
