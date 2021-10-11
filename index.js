@@ -157,7 +157,10 @@ app.use(async (ctx, next) => {
     }
     case "/alertmanager": {
       console.log("[alertmanager]", JSON.stringify({ body }));
-      fs.writeFileSync(join(__dirname, "alertmanager.log"), body);
+      fs.writeFileSync(
+        join(__dirname, "alertmanager.log"),
+        JSON.stringify(body, null, 2)
+      );
       return (ctx.body = { success: true });
     }
     case "/github": {
