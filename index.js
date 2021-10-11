@@ -1,4 +1,6 @@
 const Koa = require("koa");
+const fs = require("fs");
+const { join } = require("path");
 const bodyParser = require("koa-bodyparser");
 const { send: sendTelegram } = require("./services/telegram");
 const { send: sendKeybase } = require("./services/keybase");
@@ -155,6 +157,7 @@ app.use(async (ctx, next) => {
     }
     case "/alertmanager": {
       console.log("[alertmanager]", JSON.stringify({ body }));
+      fs.writeFileSync(join(__dirname, "alertmanager.log"), body);
       return (ctx.body = { success: true });
     }
     case "/github": {
