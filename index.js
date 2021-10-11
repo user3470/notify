@@ -1,6 +1,4 @@
 const Koa = require("koa");
-const fs = require("fs");
-const { join } = require("path");
 const bodyParser = require("koa-bodyparser");
 const { send: sendTelegram } = require("./services/telegram");
 const { send: sendKeybase } = require("./services/keybase");
@@ -103,7 +101,25 @@ app.use(async (ctx, next) => {
     return next();
   }
 
-  if (body === {}) return next();
+  if (method !== "POST") {
+    ctx.status = 400;
+    ctx.body = {
+      status: 405,
+      success: false,
+      error: `You can only POST to this app, not ${method}`,
+    };
+    return;
+  }
+
+  if (!Object.keys(body || {})?.length) {
+    ctx.status = 400;
+    ctx.body = {
+      status: 400,
+      success: false,
+      error: `Your request body can't be empty`,
+    };
+    return;
+  }
 
   switch (path) {
     case "/hyperping": {
@@ -156,13 +172,6 @@ app.use(async (ctx, next) => {
       return (ctx.body = { success: !!message });
     }
     case "/alertmanager": {
-      // Some temp logging
-      console.log("[alertmanager]", JSON.stringify({ body }));
-      fs.writeFileSync(
-        join(__dirname, "alertmanager.log"),
-        JSON.stringify(body, null, 2)
-      );
-
       if (!body?.alerts?.length) {
         ctx.status = 400;
         ctx.body = {
