@@ -173,10 +173,22 @@ app.use(async (ctx, next) => {
         return;
       }
 
+      const url =
+        body?.externalURL || "https://alertmanager.es01.simpleanalytics.com/";
+
       for (const alert of body?.alerts) {
-        const critical = alert?.labels?.severity === "critical" || false;
-        const message = `${alert?.status} ${alert?.labels?.severity} ${alert?.labels?.alertname}: ${alert?.annotations?.summary}`;
-        if (message) send(message, { critical });
+        const critical =
+          alert?.labels?.severity === "critical" &&
+          alert?.status !== "resolved";
+
+        const message = [
+          `<a href="${url}">${alert?.status}</a>`,
+          alert?.labels?.severity,
+          alert?.labels?.alertname + ":",
+          alert?.annotations?.summary,
+        ].join(" ");
+
+        send(message, { critical });
       }
 
       return (ctx.body = { success: true });
