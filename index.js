@@ -156,11 +156,19 @@ app.use(async (ctx, next) => {
       return (ctx.body = { success: !!message });
     }
     case "/alertmanager": {
+      // Some temp logging
       console.log("[alertmanager]", JSON.stringify({ body }));
       fs.writeFileSync(
         join(__dirname, "alertmanager.log"),
         JSON.stringify(body, null, 2)
       );
+
+      for (const alert of body.alerts) {
+        const critical = alert?.labels?.severity === "critical" || false;
+        const message = `${alert?.status} ${alert?.labels?.severity} ${alert?.labels?.alertname}: ${alert?.annotations?.summary}`;
+        if (message) send(message, { critical });
+      }
+
       return (ctx.body = { success: true });
     }
     case "/github": {
