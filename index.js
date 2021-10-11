@@ -163,7 +163,17 @@ app.use(async (ctx, next) => {
         JSON.stringify(body, null, 2)
       );
 
-      for (const alert of body.alerts) {
+      if (!body?.alerts?.length) {
+        ctx.status = 400;
+        ctx.body = {
+          status: 400,
+          success: false,
+          error: "No alerts[] found in body of request",
+        };
+        return;
+      }
+
+      for (const alert of body?.alerts) {
         const critical = alert?.labels?.severity === "critical" || false;
         const message = `${alert?.status} ${alert?.labels?.severity} ${alert?.labels?.alertname}: ${alert?.annotations?.summary}`;
         if (message) send(message, { critical });
